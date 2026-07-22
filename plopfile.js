@@ -1,15 +1,22 @@
-async function getLatestVersion(pkg, fallback) {
-  try {
-    const res = await fetch(`https://registry.npmjs.org/${pkg}/latest`);
-    const data = await res.json();
-    return data.version;
-  } catch {
-    return fallback;
+async function getLatestVersion(pkg) {
+  const res = await fetch(`https://registry.npmjs.org/${pkg}/latest`);
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch ${pkg}: ${res.status}`);
   }
+
+  const data = await res.json();
+  return data.version;
 }
 
 export default async function (plop) {
-  const oberryVersion = await getLatestVersion('oberry', '1.11.0');
+  let oberryVersion;
+  try {
+    oberryVersion = await getLatestVersion('oberry');
+  } catch (err) {
+    console.error('Error fetching oBerry version:', err);
+    return;
+  }
 
   plop.setGenerator('project', {
     description: 'oBerry template',
